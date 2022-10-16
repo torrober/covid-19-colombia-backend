@@ -8,13 +8,14 @@ $response = array("response" => "ok");
 $error = array("error" => "null");
 $i = 0;
 function getDBError($db_error) {
-    $response_fail_db = array("response" => "failed", "error" => "Error with the database: ".$db_error, "content" => []);
+    $response_fail_db = array("response" => "failed", "error" => "Error connecting with the database: ".$db_error, "content" => []);
     return json_encode($response_fail_db, JSON_PRETTY_PRINT);
 }
 if (intval($deptID)) {
     $squery = sprintf("SELECT * FROM `divipola_codes_town` WHERE `codigo_dept` = '%s'",
     mysqli_real_escape_string($con, $deptID));
-    $query = mysqli_query($con,$squery) or die(getDBError(mysqli_connect_error()));
+    //$squery = "SELECT * FROM `divipola_codes_town` WHERE `codigo_dept` = " . $deptID;
+    $query = mysqli_query($con,$squery) or die(getDBError(mysqli_error($con)));
     while ($row = mysqli_fetch_array($query)) {
         array_push($content, array(
             "munName" => $row['nombre_municipio'],

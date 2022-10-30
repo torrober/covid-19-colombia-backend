@@ -4,8 +4,6 @@ include('connection.php');
 include('headers.php');
 $deptID = $_GET['deptID'];
 $content = array();
-$response = array("response" => "ok");
-$error = array("error" => "null");
 $i = 0;
 function getDBError($db_error) {
     $response_fail_db = array("response" => "failed", "error" => "Error connecting with the database: ".$db_error, "content" => []);

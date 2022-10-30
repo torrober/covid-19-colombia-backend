@@ -4,8 +4,6 @@ include('connection.php');
 include('headers.php');
 $deptID = $_GET['deptID'];
 $content = array();
-$response = array("response" => "ok");
-$error = array("error" => "null");
 $i = 0;
 function getDBError($db_error) {
     $response_fail_db = array("response" => "failed", "error" => "Error connecting with the database: ".$db_error, "content" => []);
@@ -13,14 +11,32 @@ function getDBError($db_error) {
 }
 //Query Casos Reportados
 if (intval($deptID)) {
-    $squery = sprintf("SELECT * FROM `divipola_codes_town` WHERE `codigo_dept` = ''%s",
-    mysqli_real_escape_string($con, $deptID));
+    $squery = "
+    SET @deptID = ".$deptID.";
+    create temporary table Info(
+    casos2020 int, casos2021 int, casos2022 int, muertos int, recuperados int, CasosRegistrados int, CasosMasculinos int, CasosFemeninos int
+    );
+    SET
+    @casos2022 = (Select count(*) from cases where codigo_dept = @deptID AND fecha_registro LIKE '%2022%'), 
+    @casos2021 = (Select count(*) from cases where codigo_dept = @deptID AND fecha_registro LIKE '%2021%'),
+    @casos2020 = (Select count(*) from cases where codigo_dept = @deptID AND fecha_registro LIKE '%2020%'),
+    @muertos = (Select count(*) from cases where codigo_dept = @deptID AND recuperado LIKE '%Fallecido%'), 
+    @recuperados = (Select count(*) from cases where codigo_dept = @deptID AND recuperado LIKE '%Recuperado%'),
+    @CasosRegistrados = (Select count(*) from cases where codigo_dept = @deptID),
+    @CasosMasculinos = (Select count(*) from cases where codigo_dept = @deptID AND sexo = 'M'), 
+    @CasosFemeninos = (Select count(*) from cases where codigo_dept = @deptID AND  sexo = 'F');
+
+    insert into Info value(@casos2020,@casos2021,@casos2022,@muertos,@recuperados,@CasosRegistrados,@CasosMasculinos,@CasosFemeninos);
+
+    Select * from Info
+    ";
     //$squery = "SELECT * FROM `divipola_codes_town` WHERE `codigo_dept` = " . $deptID;
     $query = mysqli_query($con,$squery) or die(getDBError(mysqli_error($con)));
     while ($row = mysqli_fetch_array($query)) {
         array_push($content, array(
-            "munName" => $row['nombre_municipio'],
-            "munID" => $row['codigo_municipio']
+            "casos2020" => $row['casos2020'],
+            "casos2021" => $row['casos2021'],
+            "casos2022" => $row['casos2022'],
         ));
         $i = $i+1;
     }

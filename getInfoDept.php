@@ -1,9 +1,9 @@
 <?php
-//error_reporting(0);
+error_reporting(0);
 include('connection.php');
 include('headers.php');
 $deptID = $_GET['deptID'];
-$content = array();
+$content = [];
 $data = [];
 $i = 0;
 function getDBError($db_error)
